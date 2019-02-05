@@ -1,0 +1,14 @@
+[Unit]
+Description=App runner service
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ app_user }}
+WorkingDirectory=/opt/{{ app_user }}/app
+ExecStart=/usr/bin/java -jar /opt/{{ app_user }}/app/{{ app_name }}
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

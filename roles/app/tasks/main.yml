@@ -1,0 +1,60 @@
+---
+- name: Install Java JRE
+  yum:
+    name: java-1.8.0-openjdk-headless.x86_64
+    state: latest
+
+- name: Create user group for app user
+  group:
+    name: "{{ app_group }}"
+    state: present
+    system: yes
+
+- name: Create app user
+  user:
+    name: "{{ app_user }}"
+    state: present
+    system: yes
+
+- name: Add app user to app group
+  user:
+    name: "{{ app_user }}"
+    shell: /sbin/nologin
+    group: "{{ app_group }}"
+    append: yes
+
+- name: Create app directory 
+  file: 
+    path: /opt/{{ app_user }}/app/
+    state: directory
+
+- name: Give app user ownership
+  file:
+    path: /opt/{{ app_user }}/app/
+    recurse: yes
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+- name: Upload main app file
+  copy:
+    src: "{{ app_name }}"
+    dest: /opt/{{ app_user }}/app/{{ app_name }}
+
+- name: Create app service
+  template:
+    src: app.service
+    dest: /etc/systemd/system/app.service
+
+- name: Force systemd to reread configs
+  systemd:
+    daemon_reload: yes
+
+- name: Add app service
+  systemd:
+    name: app
+    enabled: yes
+
+- name: Start app service
+  service:
+    name: app
+    state: started

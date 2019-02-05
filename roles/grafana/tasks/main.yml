@@ -1,0 +1,72 @@
+---
+- name: Install Grafana
+  yum:
+    name: "{{ grafana_src }}"
+    state: present
+
+- name: Force Grafana restart
+  service:
+    name: grafana-server
+    state: restarted
+
+- name: Add data source - 1
+  grafana_datasource:
+    name: "{{ grafana_datasource_name }}"
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "{{ grafana_user }}"
+    grafana_password: "{{ grafana_password }}"
+    ds_type: "influxdb"
+    url: "http://{{ metric_store_ip }}:8086"
+    database: "{{ telegraf_db_name }}"
+    is_default: yes
+
+- name: Add data source - 2
+  grafana_datasource:
+    name: "{{ grafana_datasource_name_2 }}"
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "{{ grafana_user }}"
+    grafana_password: "{{ grafana_password }}"
+    ds_type: "influxdb"
+    url: "http://{{ metric_store_ip }}:8086"
+    database: "{{ telegraf_db_name_2 }}"
+    is_default: yes
+
+- name: Create dashboard directory
+  file: 
+    path: /tmp/dashboards
+    state: directory
+
+- name: Copy Grafana dashboard file - 1
+  template:
+    src: graph1.json
+    dest: /tmp/dashboards/graph1.json
+
+- name: Copy Grafana dashboard file - 2
+  template:
+    src: graph2.json
+    dest: /tmp/dashboards/graph2.json
+
+- name: Force Grafana restart
+  service:
+    name: grafana-server
+    state: restarted
+
+- name: Import Grafana dashboard - 1
+  grafana_dashboard:
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "{{ grafana_user }}"
+    grafana_password: "{{ grafana_password }}"
+    state: present
+    overwrite: yes
+    path: /tmp/dashboards/graph1.json
+  notify: Restart Grafana
+
+- name: Import Grafana dashboard - 2
+  grafana_dashboard:
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "{{ grafana_user }}"
+    grafana_password: "{{ grafana_password }}"
+    state: present
+    overwrite: yes
+    path: /tmp/dashboards/graph2.json
+  notify: Restart Grafana

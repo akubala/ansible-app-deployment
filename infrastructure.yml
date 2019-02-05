@@ -1,0 +1,24 @@
+---
+- hosts: reverse_proxy
+  become: yes
+  roles:
+    - nginx
+    - letsencrypt
+
+- hosts: app_1
+  become: yes
+  roles:
+    - app
+    - telegraf
+
+- hosts: app_2
+  become: yes
+  roles:
+    - app
+    - telegraf
+
+- hosts: stats
+  become: yes
+  roles:
+    - influxdb
+    - grafana

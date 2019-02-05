@@ -1,0 +1,6 @@
+---
+# tested on direct .rpm packages URLs
+grafana_src:
+influxdb_url:
+epel_src:
+telegraf_src:

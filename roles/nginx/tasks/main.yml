@@ -1,0 +1,23 @@
+---
+- name: Enable and install EPEL
+  yum:
+    name: "{{ epel_src }}"
+    state: present
+
+- name: Install Nginx
+  yum:
+    name: nginx
+    state: latest
+  notify: Start Nginx
+
+- name: Change server names hash bucket size
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify: Restart Nginx
+
+- name: Set our Nginx config
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/conf.d/nginx.conf
+  notify: Restart Nginx
